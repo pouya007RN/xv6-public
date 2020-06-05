@@ -89,3 +89,11 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int sys_info(struct proc_info* infoArray){
+  struct proc_info *pArray;
+  if (argptr(0,(void*)&pArray , sizeof(*pArray))<0)
+    return -1;
+  getInfo(pArray);
+  return 1;
+}
