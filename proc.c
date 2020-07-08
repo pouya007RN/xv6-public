@@ -88,7 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-
+  p->priority = 60;           // Default value
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -330,18 +330,34 @@ void
 scheduler(void)
 {
   struct proc *p;
+  struct proc *p1;
+  {
+    /* data */
+  };
+  
+
   struct cpu *c = mycpu();
   c->proc = 0;
   
   for(;;){
     // Enable interrupts on this processor.
     sti();
-
+	struct proc *highP = 0;
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
+        
+    highP = p;
+    for (p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++){
+    if (p1->state != RUNNABLE)
+        continue;
+    if (highP->priority > p1->priority)
+        highP = p1;
+    }
+    p = highP;
+
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -579,6 +595,40 @@ waitx(int * wtime , int * rtime)
     }
     sleep(curproc, &ptable.lock);
   }
+  }
+
+int
+cps()
+{
+  struct proc *p;
+  sti();
+
+  acquire(&ptable.lock);
+  cprintf("name \t pid \t state \t priority \n");
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if ( p->state == SLEEPING )
+        cprintf("%s \t %d  \t SLEEPING \t %d \n ", p->name, p->pid, p->priority);
+      else if ( p->state == RUNNING )
+        cprintf("%s \t %d  \t RUNNING \t %d \n ", p->name, p->pid, p->priority);
+      else if ( p->state == RUNNABLE )
+        cprintf("%s \t %d  \t RUNNABLE \t %d \n ", p->name, p->pid, p->priority);
+      else if ( p->state == ZOMBIE )
+        cprintf("%s \t %d  \t ZOMBIE \t %d \n ", p->name, p->pid, p->priority);
+  }
+  
+  release(&ptable.lock);
+  
+  return 22;
+}
+
+int
+set_priority(int p)
+{
+  int lastPriority = myproc()->priority;
+  myproc()->priority = p;
+  yield();
+  return lastPriority;
+
 }
 
 

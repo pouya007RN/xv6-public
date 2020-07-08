@@ -22,3 +22,6 @@
 #define SYS_close  21
 #define SYS_info   22
 #define SYS_waitx  23
+#define SYS_cps    24
+#define SYS_set_priority 25
+

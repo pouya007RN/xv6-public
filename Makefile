@@ -184,6 +184,10 @@ UPROGS=\
 	_test\
 	_sysrun\
 	_bar\
+	_ps\
+	_chpr\
+	_foo\
+
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

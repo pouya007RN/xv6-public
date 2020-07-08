@@ -54,6 +54,8 @@ struct proc {
   uint etime;                  // Process end time
   uint iotime;                 // Process sleeping time
   uint rtime;                  // Process run time
+  
+  int priority;                // Process priority
 
 };
 
